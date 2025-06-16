@@ -27,6 +27,15 @@ func (s *Service) GetTask(ctx context.Context, id domain.TaskID) (*domain.Task, 
 	return s.repo.GetTask(id)
 }
 
+func (s *Service) UpdateTask(ctx context.Context, id domain.TaskID, spec *domain.TaskSpec) (*domain.Task, error) {
+	task, err := s.repo.GetTask(id)
+	if err != nil {
+		return nil, err
+	}
+	updatedTask := task.SetSpec(spec)
+	return s.repo.UpdateTask(updatedTask)
+}
+
 func (s *Service) DeleteTask(ctx context.Context, id domain.TaskID) error {
 	return s.repo.DeleteTask(id)
 }
