@@ -17,7 +17,7 @@ import (
 // @version 1.0
 // @description Task 관리를 위한 REST API
 // @host localhost:8080
-// @BasePath /api/v1
+// @BasePath /tasker/v1
 
 func main() {
 	// Repository 초기화
@@ -45,7 +45,7 @@ func main() {
 	})
 
 	// API 라우트 그룹 설정
-	v1 := r.Group("/api/v1")
+	v1 := r.Group("/tasker/v1")
 	{
 		tasks := v1.Group("/tasks")
 		{
@@ -55,23 +55,13 @@ func main() {
 			tasks.PUT("/:id", taskHandler.UpdateTask)
 			tasks.DELETE("/:id", taskHandler.DeleteTask)
 		}
-	}
 
-	// Swagger 문서 라우트
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// 헬스 체크 엔드포인트
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"message": "Tasker API is running",
+		// Swagger 문서 라우트
+		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		v1.GET("/", func(c *gin.Context) {
+			c.Redirect(http.StatusMovedPermanently, "/tasker/v1/swagger/index.html")
 		})
-	})
-
-	// 루트 경로에서 Swagger UI로 리다이렉트
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
-	})
+	}
 
 	log.Println("Starting Tasker API server on :8080")
 	log.Println("Swagger UI available at: http://localhost:8080/swagger/index.html")

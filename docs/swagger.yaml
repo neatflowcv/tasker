@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /tasker/v1
 definitions:
   main.CreateTaskRequest:
     properties:

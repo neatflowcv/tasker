@@ -301,7 +301,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "/tasker/v1",
 	Schemes:          []string{},
 	Title:            "Tasker API",
 	Description:      "Task 관리를 위한 REST API",
