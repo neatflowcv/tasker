@@ -19,7 +19,7 @@ func NewHandler(service *flow.Service) *Handler {
 
 type CreateTaskRequest struct {
 	Title       string `json:"title" binding:"required" example:"새로운 작업"`
-	Description string `json:"description" binding:"required" example:"작업 설명"`
+	Description string `json:"description" example:"작업 설명"`
 }
 
 type TaskResponse struct {

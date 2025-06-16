@@ -263,7 +263,6 @@ const docTemplate = `{
         "main.CreateTaskRequest": {
             "type": "object",
             "required": [
-                "description",
                 "title"
             ],
             "properties": {

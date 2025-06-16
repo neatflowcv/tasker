@@ -9,7 +9,6 @@ definitions:
         example: 새로운 작업
         type: string
     required:
-    - description
     - title
     type: object
   main.TaskResponse:
