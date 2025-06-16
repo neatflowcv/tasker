@@ -1,0 +1,194 @@
+basePath: /tasker/v1
+definitions:
+  main.CreateTaskRequest:
+    properties:
+      description:
+        example: 작업 설명
+        type: string
+      title:
+        example: 새로운 작업
+        type: string
+    required:
+    - title
+    type: object
+  main.TaskResponse:
+    properties:
+      description:
+        example: 작업 설명
+        type: string
+      id:
+        example: "1"
+        type: string
+      title:
+        example: 새로운 작업
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Task 관리를 위한 REST API
+  title: Tasker API
+  version: "1.0"
+paths:
+  /tasks:
+    get:
+      description: 모든 Task 목록을 조회합니다
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.TaskResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: 새로운 Task를 생성합니다
+      parameters:
+      - description: Task information
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new task
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      description: Task를 삭제합니다
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete task
+      tags:
+      - tasks
+    get:
+      description: ID로 특정 Task를 조회합니다
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get task
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Task를 수정합니다
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated task information
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update task
+      tags:
+      - tasks
+swagger: "2.0"
