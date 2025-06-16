@@ -1,146 +1,81 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
+	"log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/neatflowcv/tasker/internal/app/flow"
+	"github.com/neatflowcv/tasker/internal/pkg/repository/fake"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/neatflowcv/tasker/docs" // Import for side effects
 )
 
-type Task struct {
-	ID        int
-	Content   string
-	Completed bool
-}
-
-var tasks []Task
-var lastID int
-
-func addTask(content string) {
-	lastID++
-	task := Task{
-		ID:        lastID,
-		Content:   content,
-		Completed: false,
-	}
-	tasks = append(tasks, task)
-	fmt.Printf("Task 추가됨: [%d] %s\n", task.ID, task.Content)
-}
-
-func listTasks() {
-	if len(tasks) == 0 {
-		fmt.Println("등록된 Task가 없습니다.")
-		return
-	}
-
-	fmt.Println("Tasks:")
-	for _, task := range tasks {
-		status := " "
-		if task.Completed {
-			status = "✓"
-		}
-		fmt.Printf("[%d] [%s] %s\n", task.ID, status, task.Content)
-	}
-}
-
-func completeTask(id int) bool {
-	for i := range tasks {
-		if tasks[i].ID == id {
-			tasks[i].Completed = true
-			fmt.Printf("Task 완료 처리됨: [%d] %s\n", id, tasks[i].Content)
-			return true
-		}
-	}
-	fmt.Printf("ID %d인 Task를 찾을 수 없습니다.\n", id)
-	return false
-}
-
-func deleteTask(id int) bool {
-	for i := range tasks {
-		if tasks[i].ID == id {
-			tasks = append(tasks[:i], tasks[i+1:]...)
-			fmt.Printf("Task 삭제됨: [%d]\n", id)
-			return true
-		}
-	}
-	fmt.Printf("ID %d인 Task를 찾을 수 없습니다.\n", id)
-	return false
-}
-
-func printHelp() {
-	fmt.Println("사용 가능한 명령어:")
-	fmt.Println("add [내용] - 새로운 Task 추가")
-	fmt.Println("list - Task 목록 조회")
-	fmt.Println("complete [ID] - Task 완료 처리")
-	fmt.Println("delete [ID] - Task 삭제")
-	fmt.Println("help - 도움말 표시")
-	fmt.Println("exit - 프로그램 종료")
-}
+// @title Tasker API
+// @version 1.0
+// @description Task 관리를 위한 REST API
+// @host localhost:8080
+// @BasePath /api/v1
 
 func main() {
-	fmt.Println("Task 관리 프로그램 시작")
-	fmt.Println("도움말을 보려면 'help'를 입력하세요")
+	// Repository 초기화
+	repo := fake.NewRepository()
+	service := flow.NewService(repo)
 
-	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		fmt.Print("> ")
-		if !scanner.Scan() {
-			break
-		}
+	// Handler 초기화
+	taskHandler := NewHandler(service)
 
-		input := scanner.Text()
-		args := strings.Fields(input)
-		if len(args) == 0 {
-			continue
-		}
+	// Gin 라우터 설정
+	r := gin.Default()
 
-		command := args[0]
-		switch command {
-		case "add":
-			if len(args) < 2 {
-				fmt.Println("사용법: add [내용]")
-				continue
-			}
-			content := strings.Join(args[1:], " ")
-			addTask(content)
+	// CORS 미들웨어 추가
+	r.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 
-		case "list":
-			listTasks()
-
-		case "complete":
-			if len(args) != 2 {
-				fmt.Println("사용법: complete [ID]")
-				continue
-			}
-			id, err := strconv.Atoi(args[1])
-			if err != nil {
-				fmt.Println("올바른 ID를 입력하세요")
-				continue
-			}
-			completeTask(id)
-
-		case "delete":
-			if len(args) != 2 {
-				fmt.Println("사용법: delete [ID]")
-				continue
-			}
-			id, err := strconv.Atoi(args[1])
-			if err != nil {
-				fmt.Println("올바른 ID를 입력하세요")
-				continue
-			}
-			deleteTask(id)
-
-		case "help":
-			printHelp()
-
-		case "exit":
-			fmt.Println("프로그램을 종료합니다")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
 			return
-
-		default:
-			fmt.Println("알 수 없는 명령어입니다. 'help'를 입력하여 도움말을 확인하세요")
 		}
+
+		c.Next()
+	})
+
+	// API 라우트 그룹 설정
+	v1 := r.Group("/api/v1")
+	{
+		tasks := v1.Group("/tasks")
+		{
+			tasks.POST("", taskHandler.CreateTask)
+			tasks.GET("", taskHandler.ListTasks)
+			tasks.GET("/:id", taskHandler.GetTask)
+			tasks.PUT("/:id", taskHandler.UpdateTask)
+			tasks.DELETE("/:id", taskHandler.DeleteTask)
+		}
+	}
+
+	// Swagger 문서 라우트
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// 헬스 체크 엔드포인트
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ok",
+			"message": "Tasker API is running",
+		})
+	})
+
+	// 루트 경로에서 Swagger UI로 리다이렉트
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(302, "/swagger/index.html")
+	})
+
+	log.Println("Starting Tasker API server on :8080")
+	log.Println("Swagger UI available at: http://localhost:8080/swagger/index.html")
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Failed to start server:", err)
 	}
 }
