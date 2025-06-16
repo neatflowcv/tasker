@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/neatflowcv/tasker/internal/app/flow"
@@ -36,7 +37,7 @@ func main() {
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
 
@@ -61,7 +62,7 @@ func main() {
 
 	// 헬스 체크 엔드포인트
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
 			"message": "Tasker API is running",
 		})
@@ -69,7 +70,7 @@ func main() {
 
 	// 루트 경로에서 Swagger UI로 리다이렉트
 	r.GET("/", func(c *gin.Context) {
-		c.Redirect(302, "/swagger/index.html")
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
 	})
 
 	log.Println("Starting Tasker API server on :8080")

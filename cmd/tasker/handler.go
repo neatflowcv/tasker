@@ -63,7 +63,7 @@ func (h *Handler) CreateTask(c *gin.Context) {
 }
 
 // ListTasks 모든 Task 목록 조회
-// @Summary Get all tasks
+// @Summary List tasks
 // @Description 모든 Task 목록을 조회합니다
 // @Tags tasks
 // @Produce json
@@ -90,7 +90,7 @@ func (h *Handler) ListTasks(c *gin.Context) {
 }
 
 // GetTask ID로 특정 Task 조회
-// @Summary Get task by ID
+// @Summary Get task
 // @Description ID로 특정 Task를 조회합니다
 // @Tags tasks
 // @Produce json

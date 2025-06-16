@@ -24,7 +24,7 @@ const docTemplate = `{
                 "tags": [
                     "tasks"
                 ],
-                "summary": "Get all tasks",
+                "summary": "List tasks",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -106,7 +106,7 @@ const docTemplate = `{
                 "tags": [
                     "tasks"
                 ],
-                "summary": "Get task by ID",
+                "summary": "Get task",
                 "parameters": [
                     {
                         "type": "string",

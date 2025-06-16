@@ -49,7 +49,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get all tasks
+      summary: List tasks
       tags:
       - tasks
     post:
@@ -145,7 +145,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get task by ID
+      summary: Get task
       tags:
       - tasks
     put:
