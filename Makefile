@@ -4,7 +4,7 @@ build:
 
 .PHONY: run
 run:
-	go run cmd/identity/*.go
+	go run cmd/tasker/*.go
 
 .PHONY: lint
 lint:
@@ -20,7 +20,7 @@ update:
 .PHONY: docs
 docs:
 	go install github.com/swaggo/swag/cmd/swag@latest
-	swag init -g cmd/identity/main.go
+	swag init -g cmd/tasker/main.go
 
 .PHONY: test
 test:
