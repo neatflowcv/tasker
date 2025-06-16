@@ -12,12 +12,12 @@ func NewTaskSpec(title, content string) *TaskSpec {
 	}
 }
 
-func (ts *TaskSpec) Title() string {
-	return ts.title
+func (s *TaskSpec) Title() string {
+	return s.title
 }
 
-func (ts *TaskSpec) Content() string {
-	return ts.content
+func (s *TaskSpec) Content() string {
+	return s.content
 }
 
 type TaskID string
@@ -46,4 +46,19 @@ func (t *Task) Title() string {
 
 func (t *Task) Content() string {
 	return t.content
+}
+
+func (t *Task) Clone() *Task {
+	return &Task{
+		id:      t.id,
+		title:   t.title,
+		content: t.content,
+	}
+}
+
+func (t *Task) SetSpec(spec *TaskSpec) *Task {
+	ret := t.Clone()
+	ret.title = spec.title
+	ret.content = spec.content
+	return ret
 }
