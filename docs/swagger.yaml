@@ -2,19 +2,19 @@ basePath: /tasker/v1
 definitions:
   main.CreateTaskRequest:
     properties:
-      content:
+      description:
         example: 작업 설명
         type: string
       title:
         example: 새로운 작업
         type: string
     required:
-    - content
+    - description
     - title
     type: object
   main.TaskResponse:
     properties:
-      content:
+      description:
         example: 작업 설명
         type: string
       id:

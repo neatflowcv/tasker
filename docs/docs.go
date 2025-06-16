@@ -263,11 +263,11 @@ const docTemplate = `{
         "main.CreateTaskRequest": {
             "type": "object",
             "required": [
-                "content",
+                "description",
                 "title"
             ],
             "properties": {
-                "content": {
+                "description": {
                     "type": "string",
                     "example": "작업 설명"
                 },
@@ -280,7 +280,7 @@ const docTemplate = `{
         "main.TaskResponse": {
             "type": "object",
             "properties": {
-                "content": {
+                "description": {
                     "type": "string",
                     "example": "작업 설명"
                 },

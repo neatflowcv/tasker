@@ -27,7 +27,7 @@ func (r *Repository) CreateTask(spec *domain.TaskSpec) (*domain.Task, error) {
 	r.counter++
 	id := domain.TaskID(fmt.Sprintf("task-%d", r.counter))
 
-	task := domain.NewTask(id, spec.Title(), spec.Content())
+	task := domain.NewTask(id, spec.Title(), spec.Description())
 	r.tasks[string(id)] = task
 
 	return task, nil

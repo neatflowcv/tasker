@@ -18,14 +18,14 @@ func NewHandler(service *flow.Service) *Handler {
 }
 
 type CreateTaskRequest struct {
-	Title   string `json:"title" binding:"required" example:"새로운 작업"`
-	Content string `json:"content" binding:"required" example:"작업 설명"`
+	Title       string `json:"title" binding:"required" example:"새로운 작업"`
+	Description string `json:"description" binding:"required" example:"작업 설명"`
 }
 
 type TaskResponse struct {
-	ID      string `json:"id" example:"1"`
-	Title   string `json:"title" example:"새로운 작업"`
-	Content string `json:"content" example:"작업 설명"`
+	ID          string `json:"id" example:"1"`
+	Title       string `json:"title" example:"새로운 작업"`
+	Description string `json:"description" example:"작업 설명"`
 }
 
 // CreateTask 새로운 Task 생성
@@ -46,7 +46,7 @@ func (h *Handler) CreateTask(c *gin.Context) {
 		return
 	}
 
-	spec := domain.NewTaskSpec(req.Title, req.Content)
+	spec := domain.NewTaskSpec(req.Title, req.Description)
 	task, err := h.service.CreateTask(c, spec)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -54,9 +54,9 @@ func (h *Handler) CreateTask(c *gin.Context) {
 	}
 
 	response := TaskResponse{
-		ID:      string(task.ID()),
-		Title:   task.Title(),
-		Content: task.Content(),
+		ID:          string(task.ID()),
+		Title:       task.Title(),
+		Description: task.Description(),
 	}
 
 	c.JSON(http.StatusCreated, response)
@@ -80,9 +80,9 @@ func (h *Handler) ListTasks(c *gin.Context) {
 	var responses []TaskResponse
 	for _, task := range tasks {
 		responses = append(responses, TaskResponse{
-			ID:      string(task.ID()),
-			Title:   task.Title(),
-			Content: task.Content(),
+			ID:          string(task.ID()),
+			Title:       task.Title(),
+			Description: task.Description(),
 		})
 	}
 
@@ -117,9 +117,9 @@ func (h *Handler) GetTask(c *gin.Context) {
 	}
 
 	response := TaskResponse{
-		ID:      string(task.ID()),
-		Title:   task.Title(),
-		Content: task.Content(),
+		ID:          string(task.ID()),
+		Title:       task.Title(),
+		Description: task.Description(),
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -151,7 +151,7 @@ func (h *Handler) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	spec := domain.NewTaskSpec(req.Title, req.Content)
+	spec := domain.NewTaskSpec(req.Title, req.Description)
 	ret, err := h.service.UpdateTask(c, domain.TaskID(id), spec)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -159,9 +159,9 @@ func (h *Handler) UpdateTask(c *gin.Context) {
 	}
 
 	response := TaskResponse{
-		ID:      string(ret.ID()),
-		Title:   ret.Title(),
-		Content: ret.Content(),
+		ID:          string(ret.ID()),
+		Title:       ret.Title(),
+		Description: ret.Description(),
 	}
 
 	c.JSON(http.StatusOK, response)

@@ -1,14 +1,14 @@
 package domain
 
 type TaskSpec struct {
-	title   string
-	content string
+	title       string
+	description string
 }
 
-func NewTaskSpec(title, content string) *TaskSpec {
+func NewTaskSpec(title, description string) *TaskSpec {
 	return &TaskSpec{
-		title:   title,
-		content: content,
+		title:       title,
+		description: description,
 	}
 }
 
@@ -16,23 +16,23 @@ func (s *TaskSpec) Title() string {
 	return s.title
 }
 
-func (s *TaskSpec) Content() string {
-	return s.content
+func (s *TaskSpec) Description() string {
+	return s.description
 }
 
 type TaskID string
 
 type Task struct {
-	id      TaskID
-	title   string
-	content string
+	id          TaskID
+	title       string
+	description string
 }
 
-func NewTask(id TaskID, title, content string) *Task {
+func NewTask(id TaskID, title, description string) *Task {
 	return &Task{
-		id:      id,
-		title:   title,
-		content: content,
+		id:          id,
+		title:       title,
+		description: description,
 	}
 }
 
@@ -44,21 +44,21 @@ func (t *Task) Title() string {
 	return t.title
 }
 
-func (t *Task) Content() string {
-	return t.content
+func (t *Task) Description() string {
+	return t.description
 }
 
 func (t *Task) Clone() *Task {
 	return &Task{
-		id:      t.id,
-		title:   t.title,
-		content: t.content,
+		id:          t.id,
+		title:       t.title,
+		description: t.description,
 	}
 }
 
 func (t *Task) SetSpec(spec *TaskSpec) *Task {
 	ret := t.Clone()
 	ret.title = spec.title
-	ret.content = spec.content
+	ret.description = spec.description
 	return ret
 }
