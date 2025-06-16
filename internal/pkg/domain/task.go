@@ -1,9 +1,5 @@
 package domain
 
-import "time"
-
-type TaskID string
-
 type TaskSpec struct {
 	title   string
 	content string
@@ -16,18 +12,38 @@ func NewTaskSpec(title, content string) *TaskSpec {
 	}
 }
 
-type Task struct {
-	id         TaskID
-	spec       *TaskSpec
-	createdAt  time.Time
-	archivedAt *time.Time // 삭제된 경우에만 설정
+func (ts *TaskSpec) Title() string {
+	return ts.title
 }
 
-func NewTask(id TaskID, spec *TaskSpec, createdAt time.Time, archivedAt *time.Time) *Task {
+func (ts *TaskSpec) Content() string {
+	return ts.content
+}
+
+type TaskID string
+
+type Task struct {
+	id      TaskID
+	title   string
+	content string
+}
+
+func NewTask(id TaskID, title, content string) *Task {
 	return &Task{
-		id:         id,
-		spec:       spec,
-		createdAt:  createdAt,
-		archivedAt: archivedAt,
+		id:      id,
+		title:   title,
+		content: content,
 	}
+}
+
+func (t *Task) ID() TaskID {
+	return t.id
+}
+
+func (t *Task) Title() string {
+	return t.title
+}
+
+func (t *Task) Content() string {
+	return t.content
 }

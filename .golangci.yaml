@@ -1,0 +1,15 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - revive
+    - depguard
+    - tagalign
+    - godot
+    - tagliatelle
+  exclusions:
+    paths:
+      - docs/
+  settings:
+    varnamelen:
+      min-name-length: 2

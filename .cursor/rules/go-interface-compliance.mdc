@@ -1,0 +1,32 @@
+---
+description: 
+globs: *.go
+alwaysApply: false
+---
+# Go 인터페이스 컴플라이언스 체크 규칙
+
+## 인터페이스 구현 체크 방식
+
+Go에서 타입이 인터페이스를 구현하는지 컴파일 타임에 체크할 때, 다음 패턴을 사용하세요:
+
+```go
+// ✅ 권장: nil 포인터 캐스팅 사용
+var _ core.Repository = (*Repository)(nil)
+
+// ❌ 피하기: 빈 구조체 인스턴스화
+var _ core.Repository = &Repository{}
+```
+
+## 이유
+
+1. **메모리 효율성**: `(*Repository)(nil)`은 메모리를 할당하지 않습니다
+2. **명확한 의도**: 컴파일 타임 체크만이 목적임을 명확히 보여줍니다
+3. **일관성**: Go 표준 라이브러리와 많은 오픈소스 프로젝트에서 사용하는 패턴입니다
+
+## 적용 파일
+
+현재 [fake_repostitory.go](mdc:internal/pkg/repository/fake/fake_repostitory.go)에서 이 패턴을 적용해야 합니다.
+
+## 일반 규칙
+
+모든 Go 파일에서 인터페이스 컴플라이언스 체크를 할 때는 항상 nil 포인터 캐스팅 방식을 사용하세요.

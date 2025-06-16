@@ -1,0 +1,83 @@
+---
+description: 
+globs: internal/pkg/domain/*.go
+alwaysApply: false
+---
+# 도메인 패키지 Encapsulation 규칙
+
+## 구조체 필드 규칙
+
+`internal/pkg/domain` 패키지에 정의된 모든 구조체의 필드는 **unexported**되어야 합니다.
+
+### ✅ 올바른 예시
+
+```go
+type Task struct {
+	id      TaskID
+	title   string
+	content string
+}
+
+type TaskSpec struct {
+	title   string
+	content string
+}
+```
+
+### ❌ 잘못된 예시
+
+```go
+type Task struct {
+	ID      TaskID  // exported 필드 (잘못됨)
+	Title   string  // exported 필드 (잘못됨)
+	Content string  // exported 필드 (잘못됨)
+}
+```
+
+## Getter 메서드 명명 규칙
+
+Getter 메서드는 `GetXXX()` 형식이 아닌 **필드명과 동일한 `XXX()` 형식**을 사용해야 합니다.
+
+### ✅ 올바른 예시
+
+```go
+func (t *Task) ID() TaskID {
+	return t.id
+}
+
+func (t *Task) Title() string {
+	return t.title
+}
+
+func (t *Task) Content() string {
+	return t.content
+}
+```
+
+### ❌ 잘못된 예시
+
+```go
+func (t *Task) GetID() TaskID {      // Get 접두사 사용 (잘못됨)
+	return t.id
+}
+
+func (t *Task) GetTitle() string {   // Get 접두사 사용 (잘못됨)
+	return t.title
+}
+```
+
+## 적용 대상 파일
+
+현재 [task.go](mdc:internal/pkg/domain/task.go)가 이 규칙을 적용해야 하는 파일입니다.
+
+## 이유
+
+1. **캡슐화**: unexported 필드를 통해 내부 상태를 보호하고 제어된 접근을 제공합니다
+2. **Go 관례**: Go에서 getter 메서드는 `Get` 접두사 없이 필드명과 동일하게 명명하는 것이 표준입니다
+3. **일관성**: 도메인 객체의 불변성과 데이터 무결성을 보장합니다
+
+## 일반 규칙
+
+- 모든 도메인 구조체는 unexported 필드를 가져야 합니다
+- 필요한 경우에만 getter 메서드를 제공합니다
+- setter 메서드보다는 생성자 함수나 메서드를 통한 상태 변경을 권장합니다
