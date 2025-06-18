@@ -7,6 +7,7 @@ linters:
     - tagalign
     - godot
     - tagliatelle
+    - prealloc
   exclusions:
     paths:
       - docs/

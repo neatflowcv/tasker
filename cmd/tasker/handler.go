@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,17 +40,20 @@ type TaskResponse struct {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /tasks [post]
-func (h *Handler) CreateTask(c *gin.Context) {
+func (h *Handler) CreateTask(ctx *gin.Context) {
 	var req CreateTaskRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
 		return
 	}
 
 	spec := domain.NewTaskSpec(req.Title, req.Description)
-	task, err := h.service.CreateTask(c, spec)
+
+	task, err := h.service.CreateTask(ctx, spec)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 
@@ -59,7 +63,7 @@ func (h *Handler) CreateTask(c *gin.Context) {
 		Description: task.Description(),
 	}
 
-	c.JSON(http.StatusCreated, response)
+	ctx.JSON(http.StatusCreated, response)
 }
 
 // ListTasks 모든 Task 목록 조회
@@ -70,23 +74,24 @@ func (h *Handler) CreateTask(c *gin.Context) {
 // @Success 200 {array} TaskResponse
 // @Failure 500 {object} map[string]string
 // @Router /tasks [get]
-func (h *Handler) ListTasks(c *gin.Context) {
-	tasks, err := h.service.ListTasks(c)
+func (h *Handler) ListTasks(ctx *gin.Context) {
+	tasks, err := h.service.ListTasks(ctx)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 
-	var responses []TaskResponse
+	var responses []*TaskResponse
 	for _, task := range tasks {
-		responses = append(responses, TaskResponse{
+		responses = append(responses, &TaskResponse{
 			ID:          string(task.ID()),
 			Title:       task.Title(),
 			Description: task.Description(),
 		})
 	}
 
-	c.JSON(http.StatusOK, responses)
+	ctx.JSON(http.StatusOK, responses)
 }
 
 // GetTask ID로 특정 Task 조회
@@ -99,20 +104,24 @@ func (h *Handler) ListTasks(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /tasks/{id} [get]
-func (h *Handler) GetTask(c *gin.Context) {
-	id := c.Param("id")
+func (h *Handler) GetTask(ctx *gin.Context) {
+	id := ctx.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID가 필요합니다"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID가 필요합니다"})
+
 		return
 	}
 
-	task, err := h.service.GetTask(c, domain.TaskID(id))
+	task, err := h.service.GetTask(ctx, domain.TaskID(id))
 	if err != nil {
-		if err == core.ErrTaskNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Task를 찾을 수 없습니다"})
+		if errors.Is(err, core.ErrTaskNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Task를 찾을 수 없습니다"})
+
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 
@@ -122,7 +131,7 @@ func (h *Handler) GetTask(c *gin.Context) {
 		Description: task.Description(),
 	}
 
-	c.JSON(http.StatusOK, response)
+	ctx.JSON(http.StatusOK, response)
 }
 
 // UpdateTask Task 수정
@@ -138,23 +147,27 @@ func (h *Handler) GetTask(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /tasks/{id} [put]
-func (h *Handler) UpdateTask(c *gin.Context) {
-	id := c.Param("id")
+func (h *Handler) UpdateTask(ctx *gin.Context) {
+	id := ctx.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID가 필요합니다"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID가 필요합니다"})
+
 		return
 	}
 
 	var req CreateTaskRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
 		return
 	}
 
 	spec := domain.NewTaskSpec(req.Title, req.Description)
-	ret, err := h.service.UpdateTask(c, domain.TaskID(id), spec)
+
+	ret, err := h.service.UpdateTask(ctx, domain.TaskID(id), spec)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 
@@ -164,7 +177,7 @@ func (h *Handler) UpdateTask(c *gin.Context) {
 		Description: ret.Description(),
 	}
 
-	c.JSON(http.StatusOK, response)
+	ctx.JSON(http.StatusOK, response)
 }
 
 // DeleteTask Task 삭제
@@ -177,22 +190,26 @@ func (h *Handler) UpdateTask(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /tasks/{id} [delete]
-func (h *Handler) DeleteTask(c *gin.Context) {
-	id := c.Param("id")
+func (h *Handler) DeleteTask(ctx *gin.Context) {
+	id := ctx.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID가 필요합니다"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID가 필요합니다"})
+
 		return
 	}
 
-	err := h.service.DeleteTask(c, domain.TaskID(id))
+	err := h.service.DeleteTask(ctx, domain.TaskID(id))
 	if err != nil {
-		if err == core.ErrTaskNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Task를 찾을 수 없습니다"})
+		if errors.Is(err, core.ErrTaskNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Task를 찾을 수 없습니다"})
+
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	ctx.Status(http.StatusNoContent)
 }

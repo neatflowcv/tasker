@@ -60,5 +60,6 @@ func (t *Task) SetSpec(spec *TaskSpec) *Task {
 	ret := t.Clone()
 	ret.title = spec.title
 	ret.description = spec.description
+
 	return ret
 }
