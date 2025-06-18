@@ -2,6 +2,7 @@ package flow
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/neatflowcv/tasker/internal/pkg/domain"
 	"github.com/neatflowcv/tasker/internal/pkg/repository/core"
@@ -16,26 +17,53 @@ func NewService(repo core.Repository) *Service {
 }
 
 func (s *Service) CreateTask(ctx context.Context, spec *domain.TaskSpec) (*domain.Task, error) {
-	return s.repo.CreateTask(spec)
+	task, err := s.repo.CreateTask(spec)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create task: %w", err)
+	}
+
+	return task, nil
 }
 
 func (s *Service) ListTasks(ctx context.Context) ([]*domain.Task, error) {
-	return s.repo.ListTasks()
+	tasks, err := s.repo.ListTasks()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tasks: %w", err)
+	}
+
+	return tasks, nil
 }
 
 func (s *Service) GetTask(ctx context.Context, id domain.TaskID) (*domain.Task, error) {
-	return s.repo.GetTask(id)
+	task, err := s.repo.GetTask(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task: %w", err)
+	}
+
+	return task, nil
 }
 
 func (s *Service) UpdateTask(ctx context.Context, id domain.TaskID, spec *domain.TaskSpec) (*domain.Task, error) {
 	task, err := s.repo.GetTask(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get task: %w", err)
 	}
+
 	updatedTask := task.SetSpec(spec)
-	return s.repo.UpdateTask(updatedTask)
+
+	updatedTask, err = s.repo.UpdateTask(updatedTask)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update task: %w", err)
+	}
+
+	return updatedTask, nil
 }
 
 func (s *Service) DeleteTask(ctx context.Context, id domain.TaskID) error {
-	return s.repo.DeleteTask(id)
+	err := s.repo.DeleteTask(id)
+	if err != nil {
+		return fmt.Errorf("failed to delete task: %w", err)
+	}
+
+	return nil
 }
