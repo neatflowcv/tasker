@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tasker-config
+  namespace: tasker
+data:
+  GIN_MODE: "release"
+  PORT: "8080"
+  # PostgreSQL 연결 설정
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "taskerdb"
+  DB_SSLMODE: "disable"
+  # 애플리케이션 설정
+  API_BASE_PATH: "/tasker/v1" 

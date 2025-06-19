@@ -28,24 +28,25 @@ func main() {
 	taskHandler := NewHandler(service)
 
 	// Gin 라우터 설정
-	r := gin.Default()
+	router := gin.Default()
 
 	// CORS 미들웨어 추가
-	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+	router.Use(func(ctx *gin.Context) {
+		ctx.Header("Access-Control-Allow-Origin", "*")
+		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		ctx.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
+		if ctx.Request.Method == http.MethodOptions {
+			ctx.AbortWithStatus(http.StatusNoContent)
+
 			return
 		}
 
-		c.Next()
+		ctx.Next()
 	})
 
 	// API 라우트 그룹 설정
-	v1 := r.Group("/tasker/v1")
+	v1 := router.Group("/tasker/v1")
 	{
 		tasks := v1.Group("/tasks")
 		{
@@ -66,7 +67,7 @@ func main() {
 	log.Println("Starting Tasker API server on :8080")
 	log.Println("Swagger UI available at: http://localhost:8080/swagger/index.html")
 
-	if err := r.Run(":8080"); err != nil {
+	if err := router.Run(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
 }

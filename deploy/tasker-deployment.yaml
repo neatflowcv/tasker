@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasker
+  namespace: tasker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tasker
+  template:
+    metadata:
+      labels:
+        app: tasker
+    spec:
+      containers:
+      - name: tasker
+        image: ghcr.io/neatflowcv/tasker:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: GIN_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: tasker-config
+              key: GIN_MODE
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: tasker-config
+              key: PORT
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: tasker-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: tasker-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: tasker-config
+              key: DB_NAME
+        - name: DB_SSLMODE
+          valueFrom:
+            configMapKeyRef:
+              name: tasker-config
+              key: DB_SSLMODE
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /tasker/v1/
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /tasker/v1/
+            port: 8080
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command: ['sh', '-c']
+        args:
+        - |
+          until pg_isready -h postgres-service -p 5432 -U postgres; do
+            echo "PostgreSQL이 준비될 때까지 대기 중..."
+            sleep 2
+          done
+          echo "PostgreSQL 준비 완료!"
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD 

@@ -40,6 +40,7 @@ func (r *Repository) DeleteTask(id domain.TaskID) error {
 	}
 
 	delete(r.tasks, string(id))
+
 	return nil
 }
 
@@ -71,5 +72,6 @@ func (r *Repository) UpdateTask(task *domain.Task) (*domain.Task, error) {
 	}
 
 	r.tasks[string(task.ID())] = task
+
 	return task, nil
 }
